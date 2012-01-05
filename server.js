@@ -6,7 +6,6 @@
 var express = require('express')
   , routes = require('./routes')
   , everyauth = require('everyauth')
-  , io = require('socket.io')
 
 
 
