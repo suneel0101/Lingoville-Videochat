@@ -14,6 +14,7 @@
 	      console.log('Connected !');
 	      socket.emit('msg', confirm('What is your message?'));
 	    });
+	   socket.emit('return connected clients');
 	  });
 	</script>
 	

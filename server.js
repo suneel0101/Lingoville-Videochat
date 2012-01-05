@@ -30,7 +30,8 @@ function addUser (source, sourceUser) {
 }
 
 var usersByLogin = {
-  'brian@example.com': addUser({ login: 'brian@example.com', password: 'password'})
+  'suneel0101@gmail.com': addUser({ login: 'suneel0101@gmail.com', password: 'suneel'}),
+  'sjchakrav@gmail.com': addUser({login:'sjchakrav@gmail.com',password:'sanjay'})
 };
 
 everyauth
@@ -174,15 +175,30 @@ io.set('authorization', function (data, accept) {
 io.sockets.on('connection', function (socket) {
   console.log('a websocket is connected!');
   console.log(socket.handshake.sessionID);
+  
   socket.on('set nickname', function (name) {
     socket.set('nickname', name, function () { socket.emit('ready'); });
   });
-
+  
   socket.on('msg', function () {
     socket.get('nickname', function (err, name) {
       console.log('Chat message by ', name);
     });
   });
+
+  socket.on('return connected clients',function(){
+    var connected={}; 
+    io.sockets.clients().forEach(function(s){
+      s.get('nickname', function(err,name){
+	    console.log('upon request, successfully got nickname', name);
+	    connected[name]=s.id;
+	    console.log(name, s.id);
+     });	
+   });
+  
+	
+  });
+
 });
 
 
