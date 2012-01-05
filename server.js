@@ -148,14 +148,7 @@ console.log("Express server listening on port %d in %s mode", app.address().port
 
 var sio=io.listen(app);
 
-sio.sockets.on('connection', function(socket){
-	console.log('A socket connected!');
-	socket.on('set username', function (name) {
-	    socket.set('username', name, function () {
-	      socket.emit('finished username set');
-	    });
-	  });
-});
+
 
 
 
