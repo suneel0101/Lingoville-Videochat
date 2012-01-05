@@ -6,6 +6,7 @@
 var express = require('express')
   , routes = require('./routes')
   , everyauth = require('everyauth')
+  , io = require('socket.io')
 
 
 
@@ -144,3 +145,18 @@ app.get('/list', checkAuth, routes.list);
 
 app.listen(13413);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+
+var sio=io.listen(app);
+
+sio.sockets.on('connection', function(socket){
+	console.log('A socket connected!');
+	socket.on('set username', function (name) {
+	    socket.set('username', name, function () {
+	      socket.emit('finished username set');
+	    });
+	  });
+});
+
+
+
+

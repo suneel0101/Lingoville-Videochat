@@ -3,6 +3,11 @@
 <head>
 	<title>Lingoville: The videochat language network </title>
 	<link rel='stylesheet' href='http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css'>
+	<script src="http://localhost:13413/socket.io/socket.io.js"></script>
+	<script>
+	  var socket = io.connect('http://localhost');
+	  
+	</script>
 	<style>
 	html, body {
 	    background-color: #eee;
@@ -69,7 +74,7 @@
           <form action="/login" method="post" class="pull-right">
             <input class="input-small" name="<%= everyauth.password.loginFormFieldName %>" type="text" placeholder="Username">
             <input class="input-small" name="<%= everyauth.password.passwordFormFieldName %>" type="password" placeholder="Password">
-            <input type="submit">Sign in</button>
+            <button class="btn" type="submit">Sign in</button>
           </form>
         </div>
       </div>
