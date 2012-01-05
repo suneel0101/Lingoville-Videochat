@@ -35,8 +35,8 @@ var usersByLogin = {
 everyauth
   .password
     .loginWith('email')
-    .getLoginPath('/')
-    .postLoginPath('/lingotim')
+    .getLoginPath('/login')
+    .postLoginPath('/login')
     .loginView('index.ejs')
 //    .loginLocals({
 //      title: 'Login'
@@ -92,7 +92,7 @@ everyauth
       return usersByLogin[login] = addUser(newUserAttrs);
     })
 
-    .loginSuccessRedirect('/lingotime')
+    .loginSuccessRedirect('/list')
     .registerSuccessRedirect('/');
 
 everyauth.everymodule
@@ -127,7 +127,20 @@ app.configure('production', function(){
 everyauth.helpExpress(app);
 // Routes
 
+function checkAuth(req,res,next){
+	if (req.user){
+		console.log('verified that its a logged in user');
+		next();
+	}
+	else {
+		console.log('not a verified user');
+		res.redirect('/login')
+	}
+}
+
 app.get('/', routes.index);
+
+app.get('/list', checkAuth, routes.list);
 
 app.listen(13413);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
