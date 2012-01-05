@@ -173,6 +173,7 @@ io.set('authorization', function (data, accept) {
 
 io.sockets.on('connection', function (socket) {
   console.log('a websocket is connected!');
+  console.log(socket.handshake.sessionID);
   socket.on('set nickname', function (name) {
     socket.set('nickname', name, function () { socket.emit('ready'); });
   });
