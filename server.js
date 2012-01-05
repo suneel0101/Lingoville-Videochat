@@ -148,7 +148,7 @@ everyauth.helpExpress(app);
 app.listen(13413);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
 
-io = require('socket.io').listen(app);
+io = require('socket.io');
 
 
 
