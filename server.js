@@ -180,23 +180,18 @@ io.sockets.on('connection', function (socket) {
     socket.set('nickname', name, function () { socket.emit('ready'); });
   });
   
-  socket.on('msg', function () {
-    socket.get('nickname', function (err, name) {
-      console.log('Chat message by ', name);
-    });
-  });
+ 
 
   socket.on('return connected clients',function(){
     var connected={}; 
     io.sockets.clients().forEach(function(s){
       s.get('nickname', function(err,name){
-	    console.log('upon request, successfully got nickname', name);
-	    connected[name]=s.id;
+	    connected[s.id]=name;
 	    console.log(name, s.id);
      });
     console.log('connectedarray',connected);	
-   });
-  
+     socket.emit('returned connected clients', connected);
+     });
 	
   });
 

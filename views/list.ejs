@@ -10,12 +10,21 @@
 
 	  socket.on('connect', function () {
 	    socket.emit('set nickname',  '<%= everyauth.user.login %>');
-	    socket.on('ready', function () {
-	      console.log('Connected !');
-	      socket.emit('msg', confirm('What is your message?'));
-	    });
 	   socket.emit('return connected clients');
-	  });
+	   socket.on('returned connected clients', function(data){
+		 console.log('received emission of returned connected clients'); 
+		 var html="<ul>";
+		  for (var index in data){
+		  	 html+="<li>"+ data[index]+"</li>";
+		  }
+		  html+="</ul";
+		  console.log(html);
+		  document.getElementById('list').innerHTML = html;
+		  
+		});
+
+		  
+	   });
 	</script>
 	
 	<style>
@@ -95,6 +104,8 @@
 	        <div class="row">
 	          <div class="span10">
 	            <h2>List of Online users!</h2>
+	            <div id="list">
+		        </div>
 	          </div>
 	          <div class="span4">
 	            <h3>Secondary content</h3>
