@@ -181,14 +181,15 @@ io.sockets.on('connection', function (socket) {
    io.sockets.emit('change in connected clients');
   });
 
-  
+  socket.on('disconnect', function () {
+    io.sockets.emit('change in connected clients');
+  });
 
   socket.on('return connected clients',function(){
-    var connected={}; 
+    var connected = new Array(); 
     io.sockets.clients().forEach(function(s){
       s.get('nickname', function(err,name){
-	    connected[s.id]=name;
-	    console.log(name, s.id);
+	    connected.push({'name':name,'id':s.id});
      });
     console.log('connectedarray',connected);	
      socket.emit('returned connected clients', connected);

@@ -16,7 +16,7 @@
 			 console.log('received emission of returned connected clients'); 
 			 var html="<ul style='list-style:none'>";
 			  for (var index in data){
-			  	 html+="<li>"+ data[index]+"</li>";
+			  	 html+="<li>"+ "<a name='"+data[index].name+ "' id='"+data[index].id+"'>"+data[index].name+"</a>"+"</li>";
 			  }
 			  html+="</ul";
 			  console.log(html);
