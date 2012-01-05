@@ -178,9 +178,10 @@ io.sockets.on('connection', function (socket) {
   
   socket.on('set nickname', function (name) {
     socket.set('nickname', name, function () { socket.emit('ready'); });
+   io.sockets.emit('change in connected clients');
   });
+
   
- 
 
   socket.on('return connected clients',function(){
     var connected={}; 
@@ -194,6 +195,7 @@ io.sockets.on('connection', function (socket) {
      });
 	
   });
+  
 
 });
 

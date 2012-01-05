@@ -10,17 +10,19 @@
 
 	  socket.on('connect', function () {
 	    socket.emit('set nickname',  '<%= everyauth.user.login %>');
-	   socket.emit('return connected clients');
-	   socket.on('returned connected clients', function(data){
-		 console.log('received emission of returned connected clients'); 
-		 var html="<ul>";
-		  for (var index in data){
-		  	 html+="<li>"+ data[index]+"</li>";
-		  }
-		  html+="</ul";
-		  console.log(html);
-		  document.getElementById('list').innerHTML = html;
-		  
+		socket.on('change in connected clients', function(){
+		   socket.emit('return connected clients');
+		   socket.on('returned connected clients', function(data){
+			 console.log('received emission of returned connected clients'); 
+			 var html="<ul style='list-style:none'>";
+			  for (var index in data){
+			  	 html+="<li>"+ data[index]+"</li>";
+			  }
+			  html+="</ul";
+			  console.log(html);
+			  document.getElementById('list').innerHTML = html;
+
+			});	
 		});
 
 		  
