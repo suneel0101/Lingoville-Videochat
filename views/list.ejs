@@ -3,9 +3,10 @@
 <head>
 	<title>Lingoville: The videochat language network </title>
 	<link rel='stylesheet' href='http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css'>
-	<script src="http://localhost:13413/socket.io/socket.io.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
 	<script>
-	  var socket = io.connect('http://localhost');
+	  var socket = io.connect();
 
 	  socket.on('connect', function () {
 	    socket.emit('set nickname',  '<%= everyauth.user.login %>');
