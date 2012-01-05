@@ -193,7 +193,8 @@ io.sockets.on('connection', function (socket) {
 	    console.log('upon request, successfully got nickname', name);
 	    connected[name]=s.id;
 	    console.log(name, s.id);
-     });	
+     });
+    console.log('connectedarray',connected);	
    });
   
 	
