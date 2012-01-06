@@ -184,9 +184,7 @@ io.sockets.on('connection', function (socket) {
   socket.on('disconnect', function () {
     io.sockets.emit('change in connected clients');
   });
-  socket.on('engage user', function(){
-	console.log('A user has been engaged!');
-})
+ 
 socket.on('message', function(msg){
       socket.broadcast.send(msg);
 	console.log(msg,'was sent');
@@ -195,9 +193,32 @@ socket.on('invitation',function(data){
 	console.log('invitation sent to server',data);
 	socket.get('nickname', function(err,nick){
 		io.sockets.socket(data.invitedid).emit('invite transmission',{inviterid:socket.id,invitername:nick});
+		socket.emit('server got invite', data.invitedname);
+		console.log('server got invite and emitted the server got invite event');
 	});
-	
+
 });
+
+
+
+socket.on('invitation accepted',function(data){
+	console.log('invitation accepted');
+	socket.get('nickname',function(err,nick){
+		io.sockets.socket(data.inviterid).emit('invite response',{'response':1});
+		socket.emit('invitation processed',{'response':1});
+		console.log('invite acceptance emitted', data.inviterid);
+		console.log('invitees socket id', socket.id);
+	});
+});
+
+socket.on('invitation denied',function(data){
+	console.log('invitation denied');
+	socket.get('nickname',function(err,nick){
+		io.sockets.socket(data.inviterid).emit('invite response',{'response':0});
+		socket.emit('invitation processed',{'response':0});
+	});
+});
+
 
   socket.on('return connected clients',function(){
     var connected = new Array();

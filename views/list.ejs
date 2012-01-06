@@ -30,11 +30,45 @@
 	
 
 			});
+
 		 socket.on('invite transmission', function(data){
 			var inviterid=data.inviterid;
 			var invitername=data.invitername;
 			$('#invite').html('You have an invite from'+invitername);
+			var accepthtml="<a onclick='socket.emit(&#39;invitation accepted&#39;,{&#39;inviterid&#39;:&#39;"+inviterid +"&#39})' href='#'>Accept</a></li>";
+			var denyhtml="<a onclick='socket.emit(&#39;invitation denied&#39;,{&#39;inviterid&#39;:&#39;"+inviterid +"&#39})' href='#'>Deny</a></li>";
+			var responsehtml=accepthtml+denyhtml;
+			$('#actions').html(responsehtml);		
 		}) ;
+		socket.on('invitation processed',function(data){
+			$('#invite').html('');
+			$('#actions').html('');
+			if (data.response==1){
+			$('#notifications').html('Connecting now...');
+			}
+			else {
+			$('notifications').html('');
+			}
+		});
+			
+		
+		socket.on('invite response',function(data){
+			console.log('Inviters server got the invitees response');
+			if (data.response==1){
+				$('#notifications').html('Invite accepted! Connecting now...');
+				}
+			else {
+				$('#notifications').html('Invite denied...');
+				}
+		});
+		socket.on('server got invite',function(inviteename){
+			    console.log('received server acknowledgement of invite');
+				var message='Waiting for response from ' + inviteename +'...';
+				$('#notifications').html(message);
+			});
+		socket.on('transmission of invite response', function(data){
+			console.log('response was',data);
+		});
    });
 
 	
@@ -125,7 +159,9 @@
 	          </div>
 	          <div class="span4">
 	            <h3 id="secondary">Secondary content</h3>
+				<div id='notifications'></div>
 				<div id='invite'></div>
+				<div id='actions'></div>
 	          </div>
 	        </div>
 	      </div>
