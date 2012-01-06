@@ -7,7 +7,10 @@
 	<script src="http://code.jquery.com/jquery.min.js"></script>
 	<script>
 	  var socket = io.connect();
-
+	socket.on('message', function(msg){
+	    console.log(msg);
+	});
+	
 	  socket.on('connect', function () {
 	    	socket.emit('set nickname',  '<%= everyauth.user.login %>');
 			socket.on('change in connected clients', function(){
@@ -16,7 +19,8 @@
 			 				console.log('received emission of returned connected clients'); 
 			 				var html="<ul style='list-style:none'>";
 			  				for (var index in data){
-			  	 				html+="<li>"+ "<button href='#' class='btn user' name='"+data[index].name+ "' id='"+data[index].id+"'>"+data[index].name+"</button>"+"</li>";
+				
+			  	 				html+="<li>"+ "<a onclick='socket.emit(&#39;invitation&#39;,{&#39;invitedid&#39;:&#39;"+data[index].id +"&#39;,&#39;invitedname&#39;:&#39;"+data[index].name+"&#39;})' href='#' class='user' name='"+data[index].name+ "' id='"+data[index].id+"'>"+data[index].name+"</a>"+"</li>";
 			  					}
 			  				html+="</ul";
 			  				console.log(html);
@@ -26,38 +30,20 @@
 	
 
 			});
-		  
+		 socket.on('invite transmission', function(data){
+			var inviterid=data.inviterid;
+			var invitername=data.invitername;
+			$('#invite').html('You have an invite from'+invitername);
+		}) ;
    });
-$('button').bind('click', function() {
-  alert('User clicked on "foo."');
-});
-		$(document).ready(function(){
-		$('button').click(function(){
-			$(this).hide();
-			console.log('engage user message sent from client');
-		})
-		$('#secondary').html('hello!');
-		
-	});
-	$("p").bind("click", function(event){
-	var str = "( " + event.pageX + ", " + event.pageY + " )";
-	$("span").text("Click happened! " + str);
-	});
-	$("p").bind("dblclick", function(){
-	$("span").text("Double-click happened in " + this.nodeName);
-	});
-	$("p").bind("mouseenter mouseleave", function(event){
-	$(this).toggleClass("over");
-	});
+
+	
+
 
 	</script>
 	
 	<style>
 
-	p { background:yellow; font-weight:bold; cursor:pointer; 
-	padding:5px; }
-	p.over { background: #ccc; }
-	span { color:red; }
 	html, body {
 	    background-color: #eee;
 	  }
@@ -130,7 +116,6 @@ $('button').bind('click', function() {
 	      <div class="content">
 	        <div class="page-header">
 	          <h1>Welcome to Lingoville <small>connect with language partners</small></h1>
-	<p>Click or double click here.</p>
 	        </div>
 	        <div class="row">
 	          <div class="span10">
@@ -140,6 +125,7 @@ $('button').bind('click', function() {
 	          </div>
 	          <div class="span4">
 	            <h3 id="secondary">Secondary content</h3>
+				<div id='invite'></div>
 	          </div>
 	        </div>
 	      </div>

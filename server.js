@@ -187,11 +187,28 @@ io.sockets.on('connection', function (socket) {
   socket.on('engage user', function(){
 	console.log('A user has been engaged!');
 })
+socket.on('message', function(msg){
+      socket.broadcast.send(msg);
+	console.log(msg,'was sent');
+  })
+socket.on('invitation',function(data){
+	console.log('invitation sent to server',data);
+	socket.get('nickname', function(err,nick){
+		io.sockets.socket(data.invitedid).emit('invite transmission',{inviterid:socket.id,invitername:nick});
+	});
+	
+});
+
   socket.on('return connected clients',function(){
-    var connected = new Array(); 
+    var connected = new Array();
     io.sockets.clients().forEach(function(s){
       s.get('nickname', function(err,name){
-	    connected.push({'name':name,'id':s.id});
+		socket.get('nickname', function(err,nickname){
+			if (nickname!=name){
+			connected.push({'name':name,'id':s.id});
+		}
+	});
+	    
      });
     console.log('connectedarray',connected);	
      socket.emit('returned connected clients', connected);
