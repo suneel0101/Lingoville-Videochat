@@ -184,7 +184,9 @@ io.sockets.on('connection', function (socket) {
   socket.on('disconnect', function () {
     io.sockets.emit('change in connected clients');
   });
-
+  socket.on('engage user', function(){
+	console.log('A user has been engaged!');
+})
   socket.on('return connected clients',function(){
     var connected = new Array(); 
     io.sockets.clients().forEach(function(s){
