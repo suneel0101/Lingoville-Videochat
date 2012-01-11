@@ -1,7 +1,7 @@
 exports.index = function(req, res){
  console.log(req.user);
   if (!req.user){
-  res.redirect('/');
+  res.render('index')
   }
   else{
 	res.redirect('/list')
