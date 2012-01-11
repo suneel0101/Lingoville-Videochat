@@ -1,63 +1,7 @@
 var express = require('express')
   , routes = require('./routes')
   , everyauth = require('everyauth')
-  , Promise = everyauth.Promise;
 
-// Configuration
- 
-everyauth.debug = true;
-
-var mongoose = require('mongoose')
-  , Schema = mongoose.Schema
-  , ObjectId = mongoose.SchemaTypes.ObjectId;
-
-var Language = new Schema({
-    name     : String
-});
-
-var UserSchema = new Schema({}),
-   User;
-
-var mongooseAuth = require('mongoose-auth');
-
-UserSchema.plugin(mongooseAuth, {
-    everymodule: {
-      everyauth: {
-          User: function () {
-            return User;
-          }
-      }
-    }
-  , password: {
-        loginWith: 'email'
-      , extraParams: {
-            username: String
-          , languages: {
-                nativespeaker: String
-              , learner: String
-            }
-        }
-      , everyauth: {
-            getLoginPath: '/login'
-          , postLoginPath: '/login'
-          , loginView: 'index.ejs'
-          , getRegisterPath: '/register'
-          , postRegisterPath: '/register'
-          , registerView: 'register.ejs'
-          , loginSuccessRedirect: '/list'
-          , registerSuccessRedirect: '/login'
-        }
-    }
-});
-// Adds login: String
-
-mongoose.model('User', UserSchema);
-mongoose.connect('mongodb://suneel0101:waldstein@staff.mongohq.com:10065/Lingoville');
-mongoose.connection.on("open", function(){
-  console.log("mongodb is connected!!");
-});
-
-User = mongoose.model('User');
 
 var app = express.createServer(
 	    express.bodyParser()
@@ -65,7 +9,6 @@ var app = express.createServer(
 	  , express.favicon()
 	  , express.cookieParser()
 	  , express.session({ secret: 'secret',key: 'express.sid' })
-	  , mongooseAuth.middleware()
 	);
 
 var configuration=require('./configura');
