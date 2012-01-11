@@ -5,7 +5,12 @@
 
 exports.index = function(req, res){
  console.log(req.user);
-  res.render('index', { title: 'Express' })
+  if (!req.user){
+  res.redirect('/login');
+  }
+  else{
+	res.redirect('/list')
+  }
 };
 
 exports.list = function(req, res){
