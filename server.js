@@ -26,7 +26,6 @@ function checkAuth(req,res,next){
 }
 // Routes
 app.get('/', routes.index);
-app.get('/login', routes.index);
 app.get('/list', checkAuth, routes.list);
 app.get('/logout', function (req, res) {
     req.logout();
