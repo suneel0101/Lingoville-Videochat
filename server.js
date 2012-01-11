@@ -1,107 +1,63 @@
-
-/**
- * Module dependencies.
- */
-
 var express = require('express')
   , routes = require('./routes')
   , everyauth = require('everyauth')
- 
-
-
+  , Promise = everyauth.Promise;
 
 // Configuration
+ 
 everyauth.debug = true;
 
-var usersById = {};
-var nextUserId = 0;
+var mongoose = require('mongoose')
+  , Schema = mongoose.Schema
+  , ObjectId = mongoose.SchemaTypes.ObjectId;
 
-function addUser (source, sourceUser) {
-  var user;
-  if (arguments.length === 1) { // password-based
-    user = sourceUser = source;
-    user.id = ++nextUserId;
-    return usersById[nextUserId] = user;
-  } else { // non-password-based
-    user = usersById[++nextUserId] = {id: nextUserId};
-    user[source] = sourceUser;
-  }
-  return user;
-}
+var Language = new Schema({
+    name     : String
+});
 
-var usersByLogin = {
-  'suneel0101@gmail.com': addUser({ login: 'suneel0101@gmail.com', password: 'suneel'}),
-  'sjchakrav@gmail.com': addUser({login:'sjchakrav@gmail.com',password:'sanjay'})
-};
+var UserSchema = new Schema({}),
+   User;
 
-everyauth
-  .password
-    .loginWith('email')
-    .getLoginPath('/login')
-    .postLoginPath('/login')
-    .loginView('index.ejs')
-//    .loginLocals({
-//      title: 'Login'
-//    })
-//    .loginLocals(function (req, res) {
-//      return {
-//        title: 'Login'
-//      }
-//    })
-    .loginLocals( function (req, res, done) {
-      setTimeout( function () {
-        done(null, {
-          title: 'Async login'
-        });
-      }, 200);
-    })
-    .authenticate( function (login, password) {
-      var errors = [];
-      if (!login) errors.push('Missing login');
-      if (!password) errors.push('Missing password');
-      if (errors.length) return errors;
-      var user = usersByLogin[login];
-      if (!user) return ['Login failed'];
-      if (user.password !== password) return ['Login failed'];
-      return user;
-    })
+var mongooseAuth = require('mongoose-auth');
 
-    .getRegisterPath('/register')
-    .postRegisterPath('/register')
-    .registerView('register.jade')
-//    .registerLocals({
-//      title: 'Register'
-//    })
-//    .registerLocals(function (req, res) {
-//      return {
-//        title: 'Sync Register'
-//      }
-//    })
-    .registerLocals( function (req, res, done) {
-      setTimeout( function () {
-        done(null, {
-          title: 'Async Register'
-        });
-      }, 200);
-    })
-    .validateRegistration( function (newUserAttrs, errors) {
-      var login = newUserAttrs.login;
-      if (usersByLogin[login]) errors.push('Login already taken');
-      return errors;
-    })
-    .registerUser( function (newUserAttrs) {
-      var login = newUserAttrs[this.loginKey()];
-      return usersByLogin[login] = addUser(newUserAttrs);
-    })
+UserSchema.plugin(mongooseAuth, {
+    everymodule: {
+      everyauth: {
+          User: function () {
+            return User;
+          }
+      }
+    }
+  , password: {
+        loginWith: 'email'
+      , extraParams: {
+            username: String
+          , languages: {
+                nativespeaker: String
+              , learner: String
+            }
+        }
+      , everyauth: {
+            getLoginPath: '/login'
+          , postLoginPath: '/login'
+          , loginView: 'index.ejs'
+          , getRegisterPath: '/register'
+          , postRegisterPath: '/register'
+          , registerView: 'register.ejs'
+          , loginSuccessRedirect: '/list'
+          , registerSuccessRedirect: '/login'
+        }
+    }
+});
+// Adds login: String
 
-    .loginSuccessRedirect('/list')
-    .registerSuccessRedirect('/');
+mongoose.model('User', UserSchema);
+mongoose.connect('mongodb://suneel0101:waldstein@staff.mongohq.com:10065/Lingoville');
+mongoose.connection.on("open", function(){
+  console.log("mongodb is connected!!");
+});
 
-everyauth.everymodule
-	 .findUserById( function (id, callback) {
-	  callback(null, usersById[id]);
-	 });
-
+User = mongoose.model('User');
 
 var app = express.createServer(
 	    express.bodyParser()
@@ -109,23 +65,12 @@ var app = express.createServer(
 	  , express.favicon()
 	  , express.cookieParser()
 	  , express.session({ secret: 'secret',key: 'express.sid' })
-	  , everyauth.middleware()
+	  , mongooseAuth.middleware()
 	);
 
-app.configure( function () {
-	  app.set('view engine', 'ejs');
-	app.set('views', __dirname + '/views');
-	app.set('view options', {layout:false});
-	});
+var configuration=require('./configura');
+configuration.start(app,express);
 
-
-app.configure('development', function(){
-  app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
-});
-
-app.configure('production', function(){
-  app.use(express.errorHandler()); 
-});
 function checkAuth(req,res,next){
 	if (req.user){
 		console.log('verified that its a logged in user');
@@ -136,109 +81,21 @@ function checkAuth(req,res,next){
 		res.redirect('/login')
 	}
 }
-
-app.get('/', routes.index);
-
-app.get('/list', checkAuth, routes.list);
-
-
-everyauth.helpExpress(app);
 // Routes
+app.get('/', routes.index);
+app.get('/list', checkAuth, routes.list);
+app.get('/logout', function (req, res) {
+    req.logout();
+    res.redirect('/');
+});
 
+mongooseAuth.helpExpress(app);
 
 app.listen(13413);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
 
-
-io = require('socket.io').listen(app);
-
-var parseCookie = require('connect').utils.parseCookie;
- 
-io.set('authorization', function (data, accept) {
-    // check if there's a cookie header
-    if (data.headers.cookie) {
-        // if there is, parse the cookie
-        data.cookie = parseCookie(data.headers.cookie);
-        // note that you will need to use the same key to grad the
-        // session id, as you specified in the Express setup.
-        data.sessionID = data.cookie['express.sid'];
-    } else {
-       // if there isn't, turn down the connection with a message
-       // and leave the function.
-       return accept('No cookie transmitted.', false);
-    }
-    // accept the incoming connection
-    accept(null, true);
-});
-
-
-io.sockets.on('connection', function (socket) {
-  console.log('a websocket is connected!');
-  console.log(socket.handshake.sessionID);
-  
-  socket.on('set nickname', function (name) {
-    socket.set('nickname', name, function () { socket.emit('ready'); });
-   io.sockets.emit('change in connected clients');
-  });
-
-  socket.on('disconnect', function () {
-    io.sockets.emit('change in connected clients');
-  });
- 
-socket.on('message', function(msg){
-      socket.broadcast.send(msg);
-	console.log(msg,'was sent');
-  })
-socket.on('invitation',function(data){
-	console.log('invitation sent to server',data);
-	socket.get('nickname', function(err,nick){
-		io.sockets.socket(data.invitedid).emit('invite transmission',{inviterid:socket.id,invitername:nick});
-		socket.emit('server got invite', data.invitedname);
-		console.log('server got invite and emitted the server got invite event');
-	});
-
-});
-
-
-
-socket.on('invitation accepted',function(data){
-	console.log('invitation accepted');
-	socket.get('nickname',function(err,nick){
-		io.sockets.socket(data.inviterid).emit('invite response',{'response':1});
-		socket.emit('invitation processed',{'response':1});
-		console.log('invite acceptance emitted', data.inviterid);
-		console.log('invitees socket id', socket.id);
-	});
-});
-
-socket.on('invitation denied',function(data){
-	console.log('invitation denied');
-	socket.get('nickname',function(err,nick){
-		io.sockets.socket(data.inviterid).emit('invite response',{'response':0});
-		socket.emit('invitation processed',{'response':0});
-	});
-});
-
-
-  socket.on('return connected clients',function(){
-    var connected = new Array();
-    io.sockets.clients().forEach(function(s){
-      s.get('nickname', function(err,name){
-		socket.get('nickname', function(err,nickname){
-			if (nickname!=name){
-			connected.push({'name':name,'id':s.id});
-		}
-	});
-	    
-     });
-    console.log('connectedarray',connected);	
-     socket.emit('returned connected clients', connected);
-     });
-	
-  });
-  
-
-});
+var sock = require("./socketstuff");
+sock.start(app);
 
 
 

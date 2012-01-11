@@ -127,14 +127,29 @@
 
 						
 <h2>Sign Up </h2>
-	<form style="margin-top:10px" action="." method="post">
-			  <input class="span6" style="margin-bottom:15px;font-size:120%;padding:10px;-webkit-border-radius: 15px; -moz-border-radius: 15px; border-radius: 15px;" name="" type="text" placeholder="Nickname"> </br>
-	  <input class="span6" style="margin-bottom:15px;font-size:120%;padding:10px;-webkit-border-radius: 15px; -moz-border-radius: 15px; border-radius: 15px;" name="" type="text" placeholder="Email"> </br>
-	  <input class="span6" style="margin-bottom:15px;font-size:120%;padding:10px;-webkit-border-radius:15px;-moz-border-radius:15px;border-radius:15px;" name="" type="password" placeholder="Password">
-				  <input class="span6" style="margin-bottom:15px;font-size:120%;padding:10px;-webkit-border-radius:15px;-moz-border-radius:15px;border-radius:15px;" name="" type="password" placeholder="Password Again">
+	<form style="margin-top:10px" action="/register" method="post">
+			  <input class="span6" style="margin-bottom:15px;font-size:120%;padding:10px;-webkit-border-radius: 15px; -moz-border-radius: 15px; border-radius: 15px;" name="username" type="text" placeholder="Nickname"> </br>
+	  <input class="span6" style="margin-bottom:15px;font-size:120%;padding:10px;-webkit-border-radius: 15px; -moz-border-radius: 15px; border-radius: 15px;" name="<%= everyauth.password.loginFormFieldName %>" type="text" placeholder="Email"> </br>
+	  <input class="span6" style="margin-bottom:15px;font-size:120%;padding:10px;-webkit-border-radius:15px;-moz-border-radius:15px;border-radius:15px;" name="<%= everyauth.password.passwordFormFieldName %>" type="password" placeholder="Password">
+		  <select class="span6" style="margin-bottom:15px;font-size:120%;padding:10px;-webkit-border-radius:15px;-moz-border-radius:15px;border-radius:15px;" name="languages.nativespeaker" type="password" placeholder="Password Again">
+					<option value="English">Native English Speaker</option>
+					<option value="Spanish">Native Spanish Speaker</option>
+					<option value="German">Native German Speaker </option>
+					<option value="Mandarin">Native Mandarin Speaker</option>
+					</select>
+			  <select class="span6" style="margin-bottom:15px;font-size:120%;padding:10px;-webkit-border-radius:15px;-moz-border-radius:15px;border-radius:15px;" name="languages.learner" type="password" placeholder="Password Again">
+					<option value="English">Learning English</option>
+					<option value="Spanish">Learning Spanish</option>
+					<option value="German">Learning German </option>
+					<option value="Mandarin">Learning Mandarin </option>
+					</select>
+				
+				
 	  <button style="margin-bottom:15px; width:90px;height:40px;font-size:120%; -webkit-border-radius:15px;-moz-border-radius:15px;border-radius:15px" class="btn" type="submit">Sign Up</button> </br>
 
 	</form>
+	
+	
 			</div>
           
   
@@ -145,7 +160,7 @@
       </div>
 
       <footer>
-        <p>&copy; Company 2011</p>
+        <p>&copy; Chakra LLC 2011</p>
       </footer>
 
     </div> <!-- /container -->

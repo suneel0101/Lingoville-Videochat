@@ -6,20 +6,20 @@
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="http://code.jquery.com/jquery.min.js"></script>
 	<script>
-	  var socket = io.connect();
+	var socket = io.connect();
 	socket.on('message', function(msg){
 	    console.log(msg);
 	});
-	
+
 	  socket.on('connect', function () {
-	    	socket.emit('set nickname',  '<%= everyauth.user.login %>');
+	    	socket.emit('set username',  '<%= everyauth.user.username %>');
 			socket.on('change in connected clients', function(){
 		   			socket.emit('return connected clients');
 		   			socket.on('returned connected clients', function(data){
 			 				console.log('received emission of returned connected clients'); 
 			 				var html="<ul style='list-style:none'>";
 			  				for (var index in data){
-				
+
 			  	 				html+="<li>"+ "<a onclick='socket.emit(&#39;invitation&#39;,{&#39;invitedid&#39;:&#39;"+data[index].id +"&#39;,&#39;invitedname&#39;:&#39;"+data[index].name+"&#39;})' href='#' class='user' name='"+data[index].name+ "' id='"+data[index].id+"'>"+data[index].name+"</a>"+"</li>";
 			  					}
 			  				html+="</ul";
@@ -27,7 +27,7 @@
 			  				document.getElementById('list').innerHTML = html;
 
 					});	
-	
+
 
 			});
 
@@ -50,8 +50,8 @@
 			$('notifications').html('');
 			}
 		});
-			
-		
+
+
 		socket.on('invite response',function(data){
 			console.log('Inviters server got the invitees response');
 			if (data.response==1){
@@ -69,13 +69,9 @@
 		socket.on('transmission of invite response', function(data){
 			console.log('response was',data);
 		});
-   });
-
+	});
 	
-
-
-	</script>
-	
+	</script>	
 	<style>
 
 	html, body {
@@ -140,7 +136,7 @@
             <li><a href="#about">About</a></li>
             <li><a href="#contact">Contact</a></li>
           </ul>
-			<p class="pull-right"><a href="/logout">(<%= everyauth.user.login %>) Logout </a> </p>
+			<p class="pull-right"><a href="/logout">(<%= everyauth.user.username %>) Logout </a> </p>
         </div>
       </div>
     </div>
