@@ -1,4 +1,4 @@
-function start(app){
+function start(app,User){
 
 io = require('socket.io').listen(app);
 
@@ -28,11 +28,65 @@ io.sockets.on('connection', function (socket) {
   
   socket.on('set username', function (name) {
     socket.set('username', name, function () { socket.emit('ready'); });
-   io.sockets.emit('change in connected clients');
+	User.findOne({'username':name},function(error,doc){
+		if(error){console.log('error finding doc when setting name');}
+		else{
+			doc.status='online';
+			doc.socketid=socket.id;
+			doc.save(function(err){
+				if(err){console.log('error saving the document');}
+			});
+			io.sockets.emit('change in connected clients');
+		}
+	});
+   
+  });
+
+  socket.on('return connected clients',function(data){
+	console.log('RETURN CONNECTED CLIENTS EVENT TRIGGERED');
+	var langlearning=data.learning;
+	var langteaching=data.teaching;
+	var connected_context = {}
+	var thisusername;
+	socket.get('username',function(err,name){
+			thisusername=name;
+			var tutorusers=User.where('status','online').where('username').ne(thisusername).where('languages.nativespeaker',langlearning).find(function(err,results){
+				if(!err){
+					connected_context['tutors']=results;
+					console.log('Potential tutors of',thisusername, 'are',results);
+			    		}
+					});
+			var studentusers=User.where('status','online').where('username').ne(thisusername).where('languages.learner',langteaching).find(function(err,docs){
+				if(!err){
+					connected_context['students']=docs;
+					console.log('Potential students of',thisusername,'are',docs);
+			    		}
+					});
+			if (connected_context.tutors!=null && connected_context.students!=null){
+				socket.emit('returned connected clients', connected_context);
+			}
+			else{
+				console.log('Error, for some reason wasnt able to fetch tutors and students!');
+			}
+	});
+
   });
 
   socket.on('disconnect', function () {
-    io.sockets.emit('change in connected clients');
+	socket.get('username',function(err,name){
+		User.findOne({'username':name},function(error,doc){
+		if(error){console.log('when disconnecting couldnot find User document');}
+		else{
+			doc.status='offline';
+			doc.socketid=null;
+			doc.save(function(err){
+				if(err){console.log('upon disconnect, error saving the document');}		
+			});
+			io.sockets.emit('change in connected clients');
+		}	
+		});
+	});
+    
   });
  
 socket.on('message', function(msg){
@@ -48,8 +102,6 @@ socket.on('invitation',function(data){
 	});
 
 });
-
-
 
 socket.on('invitation accepted',function(data){
 	console.log('invitation accepted');
@@ -70,22 +122,7 @@ socket.on('invitation denied',function(data){
 });
 
 
-  socket.on('return connected clients',function(){
-    var connected = new Array();
-    io.sockets.clients().forEach(function(s){
-      s.get('username', function(err,name){
-		socket.get('username', function(err,usernamus){
-			if (usernamus!=name){
-			connected.push({'name':name,'id':s.id});
-		}
-	});
-	    
-     });
-    console.log('connectedarray',connected);	
-     socket.emit('returned connected clients', connected);
-     });
-	
-  });
+
   
 
 });

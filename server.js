@@ -11,11 +11,11 @@ var mongoose = require('mongoose')
   , Schema = mongoose.Schema
   , ObjectId = mongoose.SchemaTypes.ObjectId;
 
-var Language = new Schema({
-    name     : String
-});
-
-var UserSchema = new Schema({}),
+var UserSchema = new Schema({
+	status: String,
+	callable: Boolean,
+	socketid: String,
+}),
    User;
 
 var mongooseAuth = require('mongoose-auth');
@@ -45,7 +45,7 @@ UserSchema.plugin(mongooseAuth, {
           , postRegisterPath: '/register'
           , registerView: 'register.ejs'
           , loginSuccessRedirect: '/list'
-          , registerSuccessRedirect: '/login'
+          , registerSuccessRedirect: '/list'
         }
     }
 });
@@ -95,7 +95,7 @@ app.listen(13413);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
 
 var sock = require("./socketstuff");
-sock.start(app);
+sock.start(app, User);
 
 
 
