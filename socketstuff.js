@@ -54,20 +54,17 @@ io.sockets.on('connection', function (socket) {
 				if(!err){
 					connected_context['tutors']=results;
 					console.log('Potential tutors of',thisusername, 'are',results);
+					var studentusers=User.where('status','online').where('username').ne(thisusername).where('languages.learner',langteaching).find(function(err,docs){
+						if(!err){
+							connected_context['students']=docs;
+							console.log('Potential students of',thisusername,'are',docs);
+							socket.emit('returned connected clients', connected_context);
+					    		}
+							});
 			    		}
 					});
-			var studentusers=User.where('status','online').where('username').ne(thisusername).where('languages.learner',langteaching).find(function(err,docs){
-				if(!err){
-					connected_context['students']=docs;
-					console.log('Potential students of',thisusername,'are',docs);
-			    		}
-					});
-			if (connected_context.tutors!=null && connected_context.students!=null){
-				socket.emit('returned connected clients', connected_context);
-			}
-			else{
-				console.log('Error, for some reason wasnt able to fetch tutors and students!');
-			}
+
+				
 	});
 
   });
