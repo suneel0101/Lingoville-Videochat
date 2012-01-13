@@ -1,4 +1,4 @@
-function start(app,User){
+function start(app,User, ot){
 
 io = require('socket.io').listen(app);
 
@@ -118,32 +118,27 @@ socket.on('invitationresponse',function(data){
 	console.log('Response to invitation received and response was ',data.response, 'inviter was',data.inviter);
 		User.findOne({'username':data.inviter,'status':'online'},function(err,result){
 		if (!err){
+			var opentoksession;
+			if (data.response=='1'){
+				ot.createSession('localhost',{},function(session){
+				  opentoksession=session;
+				console.log('OPENTOKSESSIONID is ',opentoksession.sessionId);
+					io.sockets.socket(result.socketid).emit('transmission of invitation response',{'response':data.response,'sessionId':opentoksession.sessionId});
+					socket.emit('response processed',{'response':data.response,'sessionId':opentoksession.sessionId});
+				});
+			}
+			else{opentoksession=null;
 			io.sockets.socket(result.socketid).emit('transmission of invitation response',{'response':data.response});
 			socket.emit('response processed',{'response':data.response});
 			console.log('Emitted acceptance to both clients!');
+			}
 		}
 		else {console.log('Error retrieving User document when responding to invitation acceptance');}
 		});
 	
 });
 
-socket.on('invitation accepted',function(data){
-	console.log('invitation accepted');
-	socket.get('username',function(err,usernamus){
-		io.sockets.socket(data.inviterid).emit('invite response',{'response':1});
-		socket.emit('invitation processed',{'response':1});
-		console.log('invite acceptance emitted', data.inviterid);
-		console.log('invitees socket id', socket.id);
-	});
-});
 
-socket.on('invitation denied',function(data){
-	console.log('invitation denied');
-	socket.get('username',function(err,usernamus){
-		io.sockets.socket(data.inviterid).emit('invite response',{'response':0});
-		socket.emit('invitation processed',{'response':0});
-	});
-});
 
 
 

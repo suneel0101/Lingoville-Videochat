@@ -95,7 +95,8 @@
 			if (data.response=='1'){
 			closemodal('#notifymodal');
 			startmodal('#videomodal');
-			startvideochat();
+			console.log('DATA SESSION ID is',data.sessionId);
+			startvideochat(data.sessionId);
 			}
 			else {
 			closemodal('#notifymodal');
@@ -112,7 +113,8 @@
 			if (data.response=='1'){
 				closemodal('#notifymodal');
 				startmodal('#videomodal');
-				startvideochat();
+				console.log('DATA SESSION ID is',data.sessionId);
+				startvideochat(data.sessionId);
 				}
 			else {
 				$('#notifications').html('Invite denied...');
@@ -136,11 +138,10 @@
 	<script src="http://staging.tokbox.com/v0.91/js/TB.min.js"></script>
 	<script type="text/javascript">
 	    var apiKey = '10652002';
-	    var sessionId = '1_MX4xMjMyMDgxfjcwLjQyLjQ3Ljc4fjIwMTItMDEtMTMgMTk6NDM6NDkuNjg2MDE3KzAwOjAwfjAuOTY0NTgwMjU0MzN-';
 	    var token = 'devtoken';           
 
 	    TB.setLogLevel(TB.DEBUG);     
-		function startvideochat(){
+		function startvideochat(sessionId){
 	    var session = TB.initSession(sessionId);      
 	    session.addEventListener('sessionConnected', sessionConnectedHandler);
 	    session.addEventListener('streamCreated', streamCreatedHandler);      
