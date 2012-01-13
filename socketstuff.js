@@ -43,7 +43,6 @@ io.sockets.on('connection', function (socket) {
   });
 
   socket.on('return connected clients',function(data){
-	console.log('RETURN CONNECTED CLIENTS EVENT TRIGGERED');
 	var langlearning=data.learning;
 	var langteaching=data.teaching;
 	var connected_context = {}
@@ -62,11 +61,8 @@ io.sockets.on('connection', function (socket) {
 					    		}
 							});
 			    		}
-					});
-
-				
+					});		
 	});
-
   });
 
   socket.on('disconnect', function () {
@@ -82,22 +78,42 @@ io.sockets.on('connection', function (socket) {
 			io.sockets.emit('change in connected clients');
 		}	
 		});
-	});
-    
+	});  
   });
- 
+
 socket.on('message', function(msg){
-      socket.broadcast.send(msg);
+console.log('Message was received: ',msg);      
+socket.broadcast.send(msg);
 	console.log(msg,'was sent');
   })
-socket.on('invitation',function(data){
-	console.log('invitation sent to server',data);
-	socket.get('username', function(err,usernamus){
-		io.sockets.socket(data.invitedid).emit('invite transmission',{inviterid:socket.id,invitername:usernamus});
-		socket.emit('server got invite', data.invitedname);
-		console.log('server got invite and emitted the server got invite event');
-	});
 
+socket.on('sending invitation',function(data){
+	console.log('invitation received by server');
+	User.findOne({'username':data.recipient,'status':'online'},function(err,docs){
+		if (!err){
+		socket.get('username', function(err,usernamus){
+			io.sockets.socket(docs.socketid).emit('deliver invite',{inviter:usernamus});
+			socket.emit('server got invite', data.recipient);
+			console.log('DELIVER INVITE event was emitted');
+		});	
+		}
+		else {console.log('there was an error in finding the recipient. either is offline or DNE.');}
+	});
+	
+
+});
+
+socket.on('invitationresponse',function(data){
+	console.log('Response to invitation received and response was ',data.response, 'inviter was',data.inviter);
+		User.findOne({'username':data.inviter,'status':'online'},function(err,result){
+		if (!err){
+			io.sockets.socket(result.socketid).emit('transmission of invitation response',{'response':data.response});
+			socket.emit('response processed',{'response':data.response});
+			console.log('Emitted acceptance to both clients!');
+		}
+		else {console.log('Error retrieving User document when responding to invitation acceptance');}
+		});
+	
 });
 
 socket.on('invitation accepted',function(data){

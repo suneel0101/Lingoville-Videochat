@@ -10,7 +10,25 @@
 	<script src="/javascripts/bootstrap-modal.js"></script>
 	<script src="/javascripts/bootstrap-dropdown.js"></script>
 	<script src="/javascripts/bootstrap-tabs.js"></script>
+	<script src="http://staging.tokbox.com/v0.91/js/TB.min.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
+	<script>
+
+	function startmodal(){
+	$('#videomodal').modal('show');
+    }
+	function closemodal(){
+		$('#videomodal').modal('hide');
+	}
+	function blankmodal(){
+		$('#videomodal').bind('hidden', function () {
+		  $('#notifications').html('');
+		 $('#actions').html('');
+		 $('#invite').html('');
+		})
+	}
+	</script>
+
 	<script>
 	var socket = io.connect();
 	socket.on('message', function(msg){
@@ -37,17 +55,17 @@
 						for (var index in tutorlist){
 							var tempuser=tutorlist[index];
 							console.log('tempuser',tempuser);
-							tutorshtml+="<div><a href='#'>"+tempuser.username + "</a>Fluent in"+tempuser.languages.nativespeaker +" </br>Learning " +tempuser.languages.learner+ "</br></div> <!--END OF USER INFO-->";
+							tutorshtml+="<div style='padding:15px'><div><h4><a href='#'>"+tempuser.username+"</a></h4></div><div><a onclick='startmodal();socket.emit(&#39;sending invitation&#39; ,{&#39recipient&#39:&#39;"+tempuser.username+"&#39;})' href='#'>Invite to Videochat</a><div>Fluent in <b>"+tempuser.languages.nativespeaker +"</b> </div><div>Learning <b>" +tempuser.languages.learner+ "</b></div></div></div> <!--END OF USER INFO-->";
 							tutorcounter++;
 						}
 						for (var counter in studentlist){
 							var tempuser2=studentlist[counter];
 							console.log('tempuser2',tempuser2);
-							studentshtml+="<div><a href='#'>"+tempuser2.username + "</a>Fluent in "+tempuser2.languages.nativespeaker +" </br>Learning " +tempuser2.languages.learner+ "</br></div> <!--END OF USER INFO-->";
+							studentshtml+="<div style='padding:15px'><div><h4><a href='#'>"+tempuser2.username+"</a></h4></div><div><a onclick='startmodal();socket.emit(&#39;sending invitation&#39; ,{&#39recipient&#39:&#39;"+tempuser2.username+"&#39;})' href='#'>Invite to Videochat</a><div>Fluent in <b>"+tempuser2.languages.nativespeaker +"</b> </div><div>Learning <b>" +tempuser2.languages.learner+ "</b></div></div></div> <!--END OF USER INFO-->";
 							studentcounter++;
 						}
-						if (studentcounter==0){studentshtml+="Sorry, no students online right now!";}
-						if (tutorcounter==0){tutorshtml+="Sorry, no tutors online right now!";}
+						if (studentcounter==0){studentshtml+="<div style='padding:15px'>Sorry, no students online right now!</div>";}
+						if (tutorcounter==0){tutorshtml+="<div style='padding:15px'>Sorry, no tutors online right now!</div>";}
 						console.log('studentcounter',studentcounter);
 						console.log('tutorcounter',tutorcounter);
 						console.log('studentshtml',studentshtml);
@@ -60,20 +78,24 @@
 
 			});
 
-		 socket.on('invite transmission', function(data){
-			var inviterid=data.inviterid;
-			var invitername=data.invitername;
-			$('#invite').html('You have an invite from'+invitername);
-			var accepthtml="<a onclick='socket.emit(&#39;invitation accepted&#39;,{&#39;inviterid&#39;:&#39;"+inviterid +"&#39})' href='#'>Accept</a></li>";
-			var denyhtml="<a onclick='socket.emit(&#39;invitation denied&#39;,{&#39;inviterid&#39;:&#39;"+inviterid +"&#39})' href='#'>Deny</a></li>";
-			var responsehtml=accepthtml+denyhtml;
-			$('#actions').html(responsehtml);		
+		 socket.on('deliver invite', function(data){
+			console.log('Invite delivered!');
+			$('#invite').html(data.inviter+ ' wants to videochat with you! How about it?');
+			var accepthtml="<a class='btn primary' onclick='socket.emit(&#39;invitationresponse&#39;,{&#39;inviter&#39:&#39;"+data.inviter+"&#39,&#39;response&#39;:&#39;1&#39;})' href='#'>Accept</a></li>";
+			var denyhtml="<a class='btn default' onclick='closemodal();blankmodal();socket.emit(&#39;invitationresponse&#39;,{&#39;inviter&#39:&#39;"+data.inviter+"&#39,&#39;response&#39;:&#39;0&#39;})' href='#'>Deny</a></li>";
+			var responsehtml="<span style='margin-right:15px'>"+accepthtml+"</span>"+denyhtml;
+			$('#action1').html(accepthtml);
+			$('#action2').html(denyhtml);
+			$('#videomodal').modal('show');	
 		}) ;
-		socket.on('invitation processed',function(data){
+		socket.on('response processed',function(data){
+			console.log('Processing response!');
 			$('#invite').html('');
 			$('#actions').html('');
-			if (data.response==1){
+			if (data.response=='1'){
 			$('#notifications').html('Connecting now...');
+			$('#action1').html("<a onclick='closemodal();' class='btn danger'>End Chat </a>");
+			$('#action2').html('');
 			}
 			else {
 			$('notifications').html('');
@@ -81,10 +103,12 @@
 		});
 
 
-		socket.on('invite response',function(data){
+		socket.on('transmission of invitation response',function(data){
 			console.log('Inviters server got the invitees response');
-			if (data.response==1){
+			if (data.response=='1'){
 				$('#notifications').html('Invite accepted! Connecting now...');
+				$('#action1').html("<a onclick='closemodal();' class='btn danger'>End Chat </a>");
+				$('#action2').html('');
 				}
 			else {
 				$('#notifications').html('Invite denied...');
@@ -95,13 +119,10 @@
 				var message='Waiting for response from ' + inviteename +'...';
 				$('#notifications').html(message);
 			});
-		socket.on('transmission of invite response', function(data){
-			console.log('response was',data);
-		});
+
 	});
 	
 	</script>
-
     <style type="text/css">
       /* Override some defaults */
       html, body {
@@ -227,13 +248,24 @@
 	    </div><!-- /topbar -->
 	  </div><!-- /topbar-wrapper -->
 
-    <div class="container">
-	      <div id="list">
-	      </div>
+    <div class="container" style="padding-top:30px"> 
+	<a href="#" onclick="startmodal()">Start modal </a>  
+	 <div id="videomodal" class="modal hide fade">
+	            <div class="modal-header">
+	              <h3>Video Console</h3>
+	            </div>
+	            <div class="modal-body" id="modal-body">
+					<div id='publisher'></div>
+	              	<div id='notifications'></div>
+					<div id='invite'></div>
+					<div id='actions'></div>
+	            </div>
+	            <div class="modal-footer">
+	              <span id='action1'><a href="#" class="btn primary">Primary</a> </span>
+	              <span id='action2'><a href="#" onclick="closemodal();blankmodal()" class="btn secondary">Close</a></span>
+	            </div>
+	          </div> 
 
-			<div id='notifications'></div>
-			<div id='invite'></div>
-			<div id='actions'></div>
       <div class="content" style="">
        
         <div class="row" style="">
