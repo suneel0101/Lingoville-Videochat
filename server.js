@@ -88,6 +88,7 @@ app.get('/logout', function (req, res) {
     req.logout();
     res.redirect('/');
 });
+app.get('/videotest',routes.video);
 
 mongooseAuth.helpExpress(app);
 

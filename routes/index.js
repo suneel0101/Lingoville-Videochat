@@ -14,3 +14,7 @@ exports.list = function(req, res){
   console.log(req.user);
   res.render('list', { title: 'List of Online Users' })
 };
+
+exports.video = function(req,res){
+	res.render('video');
+}

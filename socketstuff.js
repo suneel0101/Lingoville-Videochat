@@ -87,6 +87,17 @@ socket.broadcast.send(msg);
 	console.log(msg,'was sent');
   })
 
+socket.on('rescindinvite', function(data){
+	console.log('INVITE RESCINDED!');
+	var recipient=data.invitee;
+	User.findOne({'username':recipient},function(err,docs){
+		if(!err){
+		io.sockets.socket(docs.socketid).emit('invitation rescinded');
+		}
+	});
+	
+});
+
 socket.on('sending invitation',function(data){
 	console.log('invitation received by server');
 	User.findOne({'username':data.recipient,'status':'online'},function(err,docs){

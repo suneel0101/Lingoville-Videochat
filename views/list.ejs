@@ -10,20 +10,22 @@
 	<script src="/javascripts/bootstrap-modal.js"></script>
 	<script src="/javascripts/bootstrap-dropdown.js"></script>
 	<script src="/javascripts/bootstrap-tabs.js"></script>
-	<script src="http://staging.tokbox.com/v0.91/js/TB.min.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
 	<script>
-
-	function startmodal(){
-	$('#videomodal').modal('show');
+	function startmodal(identifier){
+	$(identifier).modal('show');
     }
-	function closemodal(){
-		$('#videomodal').modal('hide');
+	function closemodal(identifier){
+		$(identifier).modal('hide');
+	}
+	function blankvideo(){
+		$('#myPublisherDiv').html('');
 	}
 	function blankmodal(){
-		$('#videomodal').bind('hidden', function () {
-		  $('#notifications').html('');
-		 $('#actions').html('');
+		$('#notifymodal').bind('hidden', function () {
+		$('#notifications').html('');
+		 $('#action1').html('');
+		$('#action2').html('');
 		 $('#invite').html('');
 		})
 	}
@@ -86,43 +88,98 @@
 			var responsehtml="<span style='margin-right:15px'>"+accepthtml+"</span>"+denyhtml;
 			$('#action1').html(accepthtml);
 			$('#action2').html(denyhtml);
-			$('#videomodal').modal('show');	
+			$('#notifymodal').modal('show');	
 		}) ;
 		socket.on('response processed',function(data){
 			console.log('Processing response!');
-			$('#invite').html('');
-			$('#actions').html('');
 			if (data.response=='1'){
-			$('#notifications').html('Connecting now...');
-			$('#action1').html("<a onclick='closemodal();' class='btn danger'>End Chat </a>");
-			$('#action2').html('');
+			closemodal('#notifymodal');
+			startmodal('#videomodal');
+			startvideochat();
 			}
 			else {
-			$('notifications').html('');
+			closemodal('#notifymodal');
+			
 			}
 		});
 
-
+		socket.on('invitation rescinded', function(){
+		closemodal('#notifymodal');
+		blankmodal();
+		});
 		socket.on('transmission of invitation response',function(data){
 			console.log('Inviters server got the invitees response');
 			if (data.response=='1'){
-				$('#notifications').html('Invite accepted! Connecting now...');
-				$('#action1').html("<a onclick='closemodal();' class='btn danger'>End Chat </a>");
-				$('#action2').html('');
+				closemodal('#notifymodal');
+				startmodal('#videomodal');
+				startvideochat();
 				}
 			else {
 				$('#notifications').html('Invite denied...');
+				var endhtml="<a class='btn default' onclick='closemodal(&#39;#notifymodal&#39);blankmodal();' href='#'>Close</a></li>";
+				$('#action1').html(endhtml);
 				}
 		});
 		socket.on('server got invite',function(inviteename){
 			    console.log('received server acknowledgement of invite');
 				var message='Waiting for response from ' + inviteename +'...';
 				$('#notifications').html(message);
+				var closehtml="<a class='btn danger' onclick='socket.emit(&#39;rescindinvite&#39;,{&#39;invitee&#39;:&#39;"+inviteename+"&#39;});closemodal(&#39;#notifymodal&#39);blankmodal();' href='#'>End Call</a></li>";
+				startmodal('#notifymodal');
+				$('#action1').html(closehtml);
+				
 			});
 
 	});
 	
 	</script>
+	<script src="http://staging.tokbox.com/v0.91/js/TB.min.js"></script>
+	<script type="text/javascript">
+	    var apiKey = '10652002';
+	    var sessionId = '1_MX4xMjMyMDgxfjcwLjQyLjQ3Ljc4fjIwMTItMDEtMTMgMTk6NDM6NDkuNjg2MDE3KzAwOjAwfjAuOTY0NTgwMjU0MzN-';
+	    var token = 'devtoken';           
+
+	    TB.setLogLevel(TB.DEBUG);     
+		function startvideochat(){
+	    var session = TB.initSession(sessionId);      
+	    session.addEventListener('sessionConnected', sessionConnectedHandler);
+	    session.addEventListener('streamCreated', streamCreatedHandler);      
+	    session.connect(apiKey, token);
+
+	    var publisher;
+
+	    function sessionConnectedHandler(event) {
+	      publisher = session.publish('myPublisherDiv');
+
+	      // Subscribe to streams that were in the session when we connected
+	      subscribeToStreams(event.streams);
+	    }
+
+	    function streamCreatedHandler(event) {
+	      // Subscribe to any new streams that are created
+	      subscribeToStreams(event.streams);
+	    }
+
+	    function subscribeToStreams(streams) {
+	      for (var i = 0; i < streams.length; i++) {
+	        // Make sure we don't subscribe to ourself
+	        if (streams[i].connection.connectionId == session.connection.connectionId) {
+	          return;
+	        }
+
+	        // Create the div to put the subscriber element in to
+	        var div = document.createElement('div');
+	        div.setAttribute('id', 'stream' + streams[i].streamId);
+	        document.body.appendChild(div);
+
+	        // Subscribe to the stream
+	        session.subscribe(streams[i], div.id);
+	      }
+	    }
+	}
+	  </script>
+  
+	
     <style type="text/css">
       /* Override some defaults */
       html, body {
@@ -249,10 +306,10 @@
 	  </div><!-- /topbar-wrapper -->
 
     <div class="container" style="padding-top:30px"> 
-	<a href="#" onclick="startmodal()">Start modal </a>  
-	 <div id="videomodal" class="modal hide fade">
+	<a href="#" onclick="startmodal(&#39;#videomodal&#39;)">Start modal </a>  
+	 <div id="notifymodal" class="modal hide fade">
 	            <div class="modal-header">
-	              <h3>Video Console</h3>
+	              <h3>Videochat Invite</h3>
 	            </div>
 	            <div class="modal-body" id="modal-body">
 					<div id='publisher'></div>
@@ -261,13 +318,25 @@
 					<div id='actions'></div>
 	            </div>
 	            <div class="modal-footer">
-	              <span id='action1'><a href="#" class="btn primary">Primary</a> </span>
-	              <span id='action2'><a href="#" onclick="closemodal();blankmodal()" class="btn secondary">Close</a></span>
+	              <span id='action1'></span>
+	              <span id='action2'></span>
 	            </div>
 	          </div> 
 
       <div class="content" style="">
-       
+	
+		<div id="videomodal" class="modal hide fade">
+		           <div class="modal-header">
+		              <h3>Video Console</h3>
+		            </div>
+		            <div class="modal-body" id="modal-body">
+ 						<div id="myPublisherDiv"><h3>Connecting now!</h3></div>
+		            </div>
+		            <div class="modal-footer">
+		              <span id='action3'><a href="#" class="btn danger" onclick="closemodal(&#39;#videomodal&#39;);blankvideo()" class="btn secondary">Close</a></span>
+		            </div>
+		          </div>
+        
         <div class="row" style="">
           <div class="span7">
 	<div style=" background-color:#fff;border-radius:8px;-moz-border-radius:8px;-webkit-border-radius:8px">
