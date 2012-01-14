@@ -116,6 +116,9 @@ socket.on('sending invitation',function(data){
 
 socket.on('invitationresponse',function(data){
 	console.log('Response to invitation received and response was ',data.response, 'inviter was',data.inviter);
+		socket.get('username',function(erra,recipient){
+			
+		if (!erra){
 		User.findOne({'username':data.inviter,'status':'online'},function(err,result){
 		if (!err){
 			var opentoksession;
@@ -123,8 +126,8 @@ socket.on('invitationresponse',function(data){
 				ot.createSession('localhost',{},function(session){
 				  opentoksession=session;
 				console.log('OPENTOKSESSIONID is ',opentoksession.sessionId);
-					io.sockets.socket(result.socketid).emit('transmission of invitation response',{'response':data.response,'sessionId':opentoksession.sessionId});
-					socket.emit('response processed',{'response':data.response,'sessionId':opentoksession.sessionId});
+					io.sockets.socket(result.socketid).emit('transmission of invitation response',{'recipient':recipient,'response':data.response,'sessionId':opentoksession.sessionId});
+					socket.emit('response processed',{'inviter':data.inviter,'response':data.response,'sessionId':opentoksession.sessionId});
 				});
 			}
 			else{opentoksession=null;
@@ -135,7 +138,10 @@ socket.on('invitationresponse',function(data){
 		}
 		else {console.log('Error retrieving User document when responding to invitation acceptance');}
 		});
-	
+		}
+		else
+		{console.log("ERRA");}
+	});
 });
 
 

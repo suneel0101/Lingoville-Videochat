@@ -147,7 +147,7 @@
 	    session.addEventListener('streamCreated', streamCreatedHandler);      
 	    session.connect(apiKey, token);
 
-	    var publisher;
+		var publisher;
 
 	    function sessionConnectedHandler(event) {
 	      publisher = session.publish('myPublisherDiv');
@@ -155,6 +155,7 @@
 	      // Subscribe to streams that were in the session when we connected
 	      subscribeToStreams(event.streams);
 	    }
+	
 
 	    function streamCreatedHandler(event) {
 	      // Subscribe to any new streams that are created
@@ -307,7 +308,6 @@
 	  </div><!-- /topbar-wrapper -->
 
     <div class="container" style="padding-top:30px"> 
-	<a href="#" onclick="startmodal(&#39;#videomodal&#39;)">Start modal </a>  
 	 <div id="notifymodal" class="modal hide fade">
 	            <div class="modal-header">
 	              <h3>Videochat Invite</h3>
@@ -328,13 +328,18 @@
 	
 		<div id="videomodal" class="modal hide fade">
 		           <div class="modal-header">
+			<span id='action3'><a href="#" style="float:right" class="btn danger" onclick="closemodal(&#39;#videomodal&#39;);blankvideo()">End Call</a></span>
 		              <h3>Video Console</h3>
+		
 		            </div>
 		            <div class="modal-body" id="modal-body">
  						<div id="myPublisherDiv"><h3>Connecting now!</h3></div>
+					
 		            </div>
 		            <div class="modal-footer">
-		              <span id='action3'><a href="#" class="btn danger" onclick="closemodal(&#39;#videomodal&#39;);blankvideo()" class="btn secondary">Close</a></span>
+							<div id="chatlog"></div>
+							<div id="chatbox"><textarea id='chatter' style='width:400px'>Chat here...</textarea><a href='#' class='btn primary'>Submit</a></div>
+		              
 		            </div>
 		          </div>
         
