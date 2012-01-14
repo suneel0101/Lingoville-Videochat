@@ -38,10 +38,10 @@
 	});
 
 	  socket.on('connect', function () {
-	    	socket.emit('set username',  '<%= everyauth.user.username %>');
+	    	socket.emit('set username',  '<%= user.username %>');
 			socket.on('change in connected clients', function(){
 				console.log('received change in connected clients event');
-				var thedata={'learning':'<%= everyauth.user.languages.learner %>','teaching':'<%= everyauth.user.languages.nativespeaker %>'};
+				var thedata={'learning':'<%= user.languages.learner %>','teaching':'<%= user.languages.nativespeaker %>'};
 		   			socket.emit('return connected clients',thedata);
 					console.log('emitted return connected clients');
 		   			socket.on('returned connected clients', function(data){
@@ -251,7 +251,7 @@
 	        
 	          <ul class="nav secondary-nav">
 	            <li class="dropdown">
-	              <a href="#" class="dropdown-toggle"><Suneel><%= everyauth.user.username %></a>
+	              <a href="#" class="dropdown-toggle"><Suneel><%= user.username %></a>
 	              <ul class="dropdown-menu">
 	                <li><a href="#">Profile</a></li>
 					<li><a href="#">Progress</a></li>
@@ -361,7 +361,7 @@
 					border-top-right-radius: 8px;">
 					<ul class="pills">
 						<li style="margin-right:15px"><h2>Native Speakers</h2></li>	
-					  <li class="active"><a href="#tutors"><%= everyauth.user.languages.learner %></a></li>
+					  <li class="active"><a href="#tutors"><%= user.languages.learner %></a></li>
 					
 					</ul>
 </div>
@@ -401,7 +401,7 @@
 					
 					<ul class="pills">
 					<li style="margin-right:15px"><h2>Students </h2></li>	
-					  <li class="active"><a href="#students"><%= everyauth.user.languages.nativespeaker %></a></li>
+					  <li class="active"><a href="#students"><%= user.languages.nativespeaker %></a></li>
 					 
 					</ul>
 </div>

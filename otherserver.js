@@ -1,8 +1,13 @@
 var express = require('express')
   , routes = require('./routes')
   , everyauth = require('everyauth')
-  , Promise = everyauth.Promise;
+  , Promise = everyauth.Promise
+  , opentok = require('opentok')
+  , OPENTOK_API_KEY = '10652002' // add your API key here
+  , OPENTOK_API_SECRET = 'bc20235410ebaef25337206ab60ca296e865c9b6';
 
+// create a single instance of opentok sdk.
+var ot = new opentok.OpenTokSDK(OPENTOK_API_KEY,OPENTOK_API_SECRET)
 // Configuration
  
 everyauth.debug = true;
@@ -11,11 +16,11 @@ var mongoose = require('mongoose')
   , Schema = mongoose.Schema
   , ObjectId = mongoose.SchemaTypes.ObjectId;
 
-var Language = new Schema({
-    name     : String
-});
-
-var UserSchema = new Schema({}),
+var UserSchema = new Schema({
+	status: String,
+	callable: Boolean,
+	socketid: String,
+}),
    User;
 
 var mongooseAuth = require('mongoose-auth');
@@ -45,7 +50,7 @@ UserSchema.plugin(mongooseAuth, {
           , postRegisterPath: '/register'
           , registerView: 'register.ejs'
           , loginSuccessRedirect: '/list'
-          , registerSuccessRedirect: '/login'
+          , registerSuccessRedirect: '/list'
         }
     }
 });
@@ -89,13 +94,14 @@ app.get('/logout', function (req, res) {
     res.redirect('/');
 });
 
+
 mongooseAuth.helpExpress(app);
 
 app.listen(13413);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
 
 var sock = require("./socketstuff");
-sock.start(app);
+sock.start(app, User, ot);
 
 
 

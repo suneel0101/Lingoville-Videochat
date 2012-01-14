@@ -84,8 +84,8 @@
 	          <h3><a href="#"><img src="/images/videochatbubble.png" height="20" width="20"/> Lingoville</a></h3>
 
 	          <form  class="pull-right" action="/login" method="post">
-			  <input class="span3" style="-webkit-border-radius: 15px; -moz-border-radius: 15px; border-radius: 15px;" name="<%= everyauth.password.loginFormFieldName %>" type="text" placeholder="Username or Email"> 
-			  <input class="span3" style="-webkit-border-radius:15px;-moz-border-radius:15px;border-radius:15px;" name="<%= everyauth.password.passwordFormFieldName %>" type="password" placeholder="Password">
+			  <input class="span3" style="-webkit-border-radius: 15px; -moz-border-radius: 15px; border-radius: 15px;" name="username" type="text" placeholder="Username or Email"> 
+			  <input class="span3" style="-webkit-border-radius:15px;-moz-border-radius:15px;border-radius:15px;" name="password" type="password" placeholder="Password">
 			  <button style="-webkit-border-radius:5px;-moz-border-radius:15px;border-radius:15px" class="btn" type="submit">Login</button>
 			</form>
 	        
@@ -128,16 +128,16 @@
 						
 <h2>Sign Up </h2>
 	<form style="margin-top:10px" action="/register" method="post">
-			  <input class="span6" style="margin-bottom:15px;font-size:120%;padding:10px;-webkit-border-radius: 15px; -moz-border-radius: 15px; border-radius: 15px;" name="username" type="text" placeholder="Username"> </br>
-	  <input class="span6" style="margin-bottom:15px;font-size:120%;padding:10px;-webkit-border-radius: 15px; -moz-border-radius: 15px; border-radius: 15px;" name="<%= everyauth.password.loginFormFieldName %>" type="text" placeholder="Email"> </br>
-	  <input class="span6" style="margin-bottom:15px;font-size:120%;padding:10px;-webkit-border-radius:15px;-moz-border-radius:15px;border-radius:15px;" name="<%= everyauth.password.passwordFormFieldName %>" type="password" placeholder="Password">
-		  <select class="span6" style="margin-bottom:15px;font-size:120%;padding:10px;-webkit-border-radius:15px;-moz-border-radius:15px;border-radius:15px;" name="languages.nativespeaker" type="password" placeholder="Password Again">
+			  <input class="span6" style="margin-bottom:15px;font-size:120%;padding:10px;-webkit-border-radius: 15px; -moz-border-radius: 15px; border-radius: 15px;" name="registerusername" type="text" placeholder="Username"> </br>
+	  <input class="span6" style="margin-bottom:15px;font-size:120%;padding:10px;-webkit-border-radius: 15px; -moz-border-radius: 15px; border-radius: 15px;" name="registeremail" type="text" placeholder="Email"> </br>
+	  <input class="span6" style="margin-bottom:15px;font-size:120%;padding:10px;-webkit-border-radius:15px;-moz-border-radius:15px;border-radius:15px;" name="registerpassword" type="password" placeholder="Password">
+		  <select class="span6" style="margin-bottom:15px;font-size:120%;padding:10px;-webkit-border-radius:15px;-moz-border-radius:15px;border-radius:15px;" name="nativespeaker">
 					<option value="English">Native English Speaker</option>
 					<option value="Spanish">Native Spanish Speaker</option>
 					<option value="German">Native German Speaker </option>
 					<option value="Mandarin">Native Mandarin Speaker</option>
 					</select>
-			  <select class="span6" style="margin-bottom:15px;font-size:120%;padding:10px;-webkit-border-radius:15px;-moz-border-radius:15px;border-radius:15px;" name="languages.learner" type="password" placeholder="Password Again">
+			  <select class="span6" style="margin-bottom:15px;font-size:120%;padding:10px;-webkit-border-radius:15px;-moz-border-radius:15px;border-radius:15px;" name="learner">
 					<option value="English">Learning English</option>
 					<option value="Spanish">Learning Spanish</option>
 					<option value="German">Learning German </option>
