@@ -26,6 +26,9 @@ io.sockets.on('connection', function (socket) {
   console.log('a websocket is connected!');
   console.log(socket.handshake.sessionID);
   
+
+
+  //set username, notify all sockets that there has been a new connection
   socket.on('set username', function (name) {
     socket.set('username', name, function () { socket.emit('ready'); });
 	User.findOne({'username':name},function(error,doc){
@@ -42,6 +45,7 @@ io.sockets.on('connection', function (socket) {
    
   });
 
+  //returns list of connected clients to all sockets, filtering out the irrelevant clients
   socket.on('return connected clients',function(data){
 	var langlearning=data.learning;
 	var langteaching=data.teaching;
@@ -64,7 +68,8 @@ io.sockets.on('connection', function (socket) {
 					});		
 	});
   });
-
+  //when a socket disconnects, changes the document of the corresponding user to offline and notifies 
+ //all sockets that a user has disconnected
   socket.on('disconnect', function () {
 	socket.get('username',function(err,name){
 		User.findOne({'username':name},function(error,doc){
@@ -87,6 +92,8 @@ socket.broadcast.send(msg);
 	console.log(msg,'was sent');
   })
 
+//when an inviter ends the call before the recipient has a chance to deny or accept
+//this event is fired and the recipients modal is closed
 socket.on('rescindinvite', function(data){
 	console.log('INVITE RESCINDED!');
 	var recipient=data.invitee;
@@ -98,6 +105,13 @@ socket.on('rescindinvite', function(data){
 	
 });
 
+//on call ending, force the non-enders chat to close
+socket.on('call ended', function(data){
+	socket.broadcast.to(data.room).emit('call ended');
+});
+
+
+//invite sent from a socket
 socket.on('sending invitation',function(data){
 	console.log('invitation received by server');
 	User.findOne({'username':data.recipient,'status':'online'},function(err,docs){
@@ -114,6 +128,7 @@ socket.on('sending invitation',function(data){
 
 });
 
+//processes the response to an invite, either deny or accept
 socket.on('invitationresponse',function(data){
 	console.log('Response to invitation received and response was ',data.response, 'inviter was',data.inviter);
 		socket.get('username',function(erra,recipient){
@@ -126,8 +141,13 @@ socket.on('invitationresponse',function(data){
 				ot.createSession('localhost',{},function(session){
 				  opentoksession=session;
 				console.log('OPENTOKSESSIONID is ',opentoksession.sessionId);
-					io.sockets.socket(result.socketid).emit('transmission of invitation response',{'recipient':recipient,'response':data.response,'sessionId':opentoksession.sessionId});
-					socket.emit('response processed',{'inviter':data.inviter,'response':data.response,'sessionId':opentoksession.sessionId});
+					var string="convo " + recipient + ", " + data.inviter;
+					socket.join(string);
+					io.sockets.socket(result.socketid).join(string);
+					io.sockets.socket(result.socketid).emit('transmission of invitation response',{'room':string,'recipient':recipient,'response':data.response,'sessionId':opentoksession.sessionId});
+					socket.emit('response processed',{'inviter':data.inviter,'response':data.response,'sessionId':opentoksession.sessionId, 'room':string});
+					
+					
 				});
 			}
 			else{opentoksession=null;
@@ -144,6 +164,14 @@ socket.on('invitationresponse',function(data){
 	});
 });
 
+//sends chat to both members of the chatroom
+socket.on('sendchat', function(data){
+	socket.get('username', function(err,name){
+		var themessage="<div><b>"+name+"</b>:" + data.message+"</div>";
+		socket.broadcast.to(data.room).emit('newchat', themessage);
+		socket.emit('newchat',themessage);
+	});
+});
 
 
 

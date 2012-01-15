@@ -20,6 +20,7 @@
 	}
 	function blankvideo(){
 		$('#myPublisherDiv').html('');
+		$('#chatarea').html('');
 	}
 	function blankmodal(){
 		$('#notifymodal').bind('hidden', function () {
@@ -28,6 +29,13 @@
 		$('#action2').html('');
 		 $('#invite').html('');
 		})
+	}
+	function erasemodal(){
+		$('#notifications').html('');
+		 $('#action1').html('');
+		$('#action2').html('');
+		 $('#invite').html('');
+		
 	}
 	</script>
 
@@ -90,13 +98,17 @@
 			$('#action2').html(denyhtml);
 			$('#notifymodal').modal('show');	
 		}) ;
+		var theroom;
 		socket.on('response processed',function(data){
 			console.log('Processing response!');
 			if (data.response=='1'){
-			closemodal('#notifymodal');
-			startmodal('#videomodal');
+			theroom=data.room;
+			erasemodal();
+			$('#notifications').html('<h3>Connecting...</h3>');
+			var boxhtml="	<div id='chatlog' style='height:120px;overflow:auto'></div><div id='chatbox'><form><textarea id='chatter' style='width:500px'></textarea><input type='button' value='Send' onclick='sendchat(&#39;"+data.room+"&#39;);this.form.reset();' class='btn primary'></form></div>";
 			console.log('DATA SESSION ID is',data.sessionId);
-			startvideochat(data.sessionId);
+			startvideochat(data.sessionId, theroom,boxhtml);
+			
 			}
 			else {
 			closemodal('#notifymodal');
@@ -104,6 +116,11 @@
 			}
 		});
 
+		socket.on('newchat', function(message){
+			console.log('newchat received!');
+			$('#chatlog').append(message);
+		});
+		
 		socket.on('invitation rescinded', function(){
 		closemodal('#notifymodal');
 		blankmodal();
@@ -111,16 +128,22 @@
 		socket.on('transmission of invitation response',function(data){
 			console.log('Inviters server got the invitees response');
 			if (data.response=='1'){
-				closemodal('#notifymodal');
-				startmodal('#videomodal');
+				theroom=data.room;
+				erasemodal();
+				$('#notifications').html('<h3>Connecting...</h3>');
+				var boxhtml="<div id='chatlog' style='height:120px;overflow:auto'></div><div id='chatbox'><form><textarea id='chatter' style='width:500px'></textarea><input type='button' value='Send' onclick='sendchat(&#39;"+data.room+"&#39;);this.form.reset();' class='btn primary'></form></div>";
+				
 				console.log('DATA SESSION ID is',data.sessionId);
-				startvideochat(data.sessionId);
+				startvideochat(data.sessionId, theroom,boxhtml);
 				}
 			else {
 				$('#notifications').html('Invite denied...');
 				var endhtml="<a class='btn default' onclick='closemodal(&#39;#notifymodal&#39);blankmodal();' href='#'>Close</a></li>";
 				$('#action1').html(endhtml);
 				}
+		});
+		socket.on('call ended', function(){
+			endvideochat();
 		});
 		socket.on('server got invite',function(inviteename){
 			    console.log('received server acknowledgement of invite');
@@ -135,23 +158,41 @@
 	});
 	
 	</script>
+	<script>function sendchat(room){
+		console.log('sendchat event trigged!');
+		socket.emit('sendchat',{'room':room,'message':$('#chatter').val()});
+	}</script>
 	<script src="http://staging.tokbox.com/v0.91/js/TB.min.js"></script>
 	<script type="text/javascript">
 	    var apiKey = '10652002';
 	    var token = 'devtoken';           
-
+		var newsession;
 	    TB.setLogLevel(TB.DEBUG);     
-		function startvideochat(sessionId){
+		
+		function endvideochat(){
+			newsession.disconnect();
+			$('#endcall').html('');
+			$('#chatarea').html('');
+			$('#mainpanel').show();
+			
+			console.log('CALL ENDED!');
+		}		
+		function startvideochat(sessionId, theroom,boxhtml){
 	    var session = TB.initSession(sessionId);      
-	    session.addEventListener('sessionConnected', sessionConnectedHandler);
+	    newsession=session;
+		session.addEventListener('sessionConnected', sessionConnectedHandler);
 	    session.addEventListener('streamCreated', streamCreatedHandler);      
 	    session.connect(apiKey, token);
 
 		var publisher;
 
 	    function sessionConnectedHandler(event) {
-	      publisher = session.publish('myPublisherDiv');
-
+	      $('#mainpanel').hide();
+		  publisher = session.publish('publio');
+		$('#chatarea').html(boxhtml);
+		  closemodal('#notifymodal');
+		  $('#endcall').html("<button class='btn danger' onclick='socket.emit(&#39;call ended&#39;,{&#39;room&#39;:&#39;"+theroom+"&#39;});endvideochat()'>End Call</button>");
+		  blankmodal();
 	      // Subscribe to streams that were in the session when we connected
 	      subscribeToStreams(event.streams);
 	    }
@@ -175,7 +216,7 @@
 	        document.body.appendChild(div);
 
 	        // Subscribe to the stream
-	        session.subscribe(streams[i], div.id);
+	        session.subscribe(streams[i], 'coolio');
 	      }
 	    }
 	}
@@ -259,30 +300,6 @@
 	              </ul>
 	            </li>
 			
-
-				<li class="dropdown">
-	              <a href="#" class="dropdown-toggle"> Chat (78) </a>
-	              <ul class="dropdown-menu chatlist" style="height:230px; overflow:auto">
-	                <li><a href="#">John Frederich</a></li>
-	                <li><a href="#">Atuna Tatsumoto</a></li>
-					<li><a href="#">Henry Xie</a></li>
-					<li><a href="#">Kumar Shiv Patel</a></li>
-					<li><a href="#">Saito Masumi</a></li>
-					<li><a href="#">Geraldo Rodriguez</a></li>
-					<li><a href="#">Tatsu Hayashi</a></li>
-					<li><a href="#">Enrique Paralavida</a></li>
-					<li><a href="#">Tatiana Peralta</a></li>
-					<li><a href="#">Cat Hsu</a></li>
-					<li><a href="#">Jeff Bridges</a></li>
-					<li><a href="#">Katya Chu</a></li>
-					<li><a href="#">Mila Lola</a></li>
-					<li><a href="#">Billy Kronenberger</a></li>
-					<li><a href="#">Dillon Lebouchard</a></li>
-			
-
-					
-	              </ul>
-	            </li>
 				<li class="dropdown">
 	              <a href="#" class="dropdown-toggle">Messages !</a>
 	              <ul class="dropdown-menu">
@@ -308,12 +325,24 @@
 	  </div><!-- /topbar-wrapper -->
 
     <div class="container" style="padding-top:30px"> 
-	 <div id="notifymodal" class="modal hide fade">
+	<div id="endcall"></div>
+	<div class="row" style="">
+		<div class="span4">
+				<div id="coolio"></div>
+		</div>
+		<div class="span4">
+			<div id="publio"></div>
+		</div>
+	</div>
+	<div id="chatarea">
+	
+	</div>
+	
+	<div id="notifymodal" class="modal hide fade">
 	            <div class="modal-header">
 	              <h3>Videochat Invite</h3>
 	            </div>
 	            <div class="modal-body" id="modal-body">
-					<div id='publisher'></div>
 	              	<div id='notifications'></div>
 					<div id='invite'></div>
 					<div id='actions'></div>
@@ -337,12 +366,11 @@
 					
 		            </div>
 		            <div class="modal-footer">
-							<div id="chatlog"></div>
-							<div id="chatbox"><textarea id='chatter' style='width:400px'>Chat here...</textarea><a href='#' class='btn primary'>Submit</a></div>
+
 		              
 		            </div>
 		          </div>
-        
+        <div id="mainpanel">
         <div class="row" style="">
           <div class="span7">
 	<div style=" background-color:#fff;border-radius:8px;-moz-border-radius:8px;-webkit-border-radius:8px">
@@ -422,8 +450,9 @@
 
 
           </div>
-
+		
         </div>
+</div>
       </div>
 
       <footer>
