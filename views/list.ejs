@@ -37,6 +37,9 @@
 		 $('#invite').html('');
 		
 	}
+	function runScript(event){
+		
+	}
 	</script>
 
 	<script>
@@ -105,7 +108,7 @@
 			theroom=data.room;
 			erasemodal();
 			$('#notifications').html('<h3>Connecting...</h3>');
-			var boxhtml="	<div id='chatlog' style='height:120px;overflow:auto'></div><div id='chatbox'><form><textarea id='chatter' style='width:500px'></textarea><input type='button' value='Send' onclick='sendchat(&#39;"+data.room+"&#39;);this.form.reset();' class='btn primary'></form></div>";
+			var boxhtml="<div style='background-color:#f8f8f8;padding-bottom:5px;border-radius:8px;moz-border-radius:8px;-webkit-border-radius:8px;width:480px'><div id='chatlog' style='height:80px;overflow:auto'></div><div id='chatbox'><form onsubmit='return false;'><input type='text' id='chatter' style='margin-left:5px;width:393px' onkeypress='return runScript(event)'/><input type='button' value='Send' onclick='sendchat(&#39;"+data.room+"&#39;);this.form.reset();' class='btn primary'></form></div></div>";
 			console.log('DATA SESSION ID is',data.sessionId);
 			startvideochat(data.sessionId, theroom,boxhtml);
 			
@@ -131,7 +134,7 @@
 				theroom=data.room;
 				erasemodal();
 				$('#notifications').html('<h3>Connecting...</h3>');
-				var boxhtml="<div id='chatlog' style='height:120px;overflow:auto'></div><div id='chatbox'><form><textarea id='chatter' style='width:500px'></textarea><input type='button' value='Send' onclick='sendchat(&#39;"+data.room+"&#39;);this.form.reset();' class='btn primary'></form></div>";
+			var boxhtml="<div style='background-color:#f8f8f8;padding-bottom:5px;border-radius:8px;moz-border-radius:8px;-webkit-border-radius:8px;width:480px'><div id='chatlog' style='height:80px;overflow:auto'></div><div id='chatbox'><form onsubmit='return false;'><input type='text' id='chatter' style='margin-left:5px;width:393px' onkeypress='return runScript(event)'/><input type='button' value='Send' onclick='sendchat(&#39;"+data.room+"&#39;);this.form.reset();' class='btn primary'></form></div></div>";
 				
 				console.log('DATA SESSION ID is',data.sessionId);
 				startvideochat(data.sessionId, theroom,boxhtml);
@@ -168,7 +171,10 @@
 	    var token = 'devtoken';           
 		var newsession;
 	    TB.setLogLevel(TB.DEBUG);     
-		
+		var PUBLISHER_WIDTH = 119;
+		var PUBLISHER_HEIGHT = 89;
+		var subscriber_width = 480;
+		var subscriber_height = 360;
 		function endvideochat(){
 			newsession.disconnect();
 			$('#endcall').html('');
@@ -188,7 +194,8 @@
 
 	    function sessionConnectedHandler(event) {
 	      $('#mainpanel').hide();
-		  publisher = session.publish('publio');
+		var publisherProps = {width: PUBLISHER_WIDTH, height: PUBLISHER_HEIGHT};
+		  publisher = session.publish('publio',publisherProps);
 		$('#chatarea').html(boxhtml);
 		  closemodal('#notifymodal');
 		  $('#endcall').html("<button class='btn danger' onclick='socket.emit(&#39;call ended&#39;,{&#39;room&#39;:&#39;"+theroom+"&#39;});endvideochat()'>End Call</button>");
@@ -214,9 +221,9 @@
 	        var div = document.createElement('div');
 	        div.setAttribute('id', 'stream' + streams[i].streamId);
 	        document.body.appendChild(div);
-
+			var subscriberProps = {width: subscriber_width,height: subscriber_height};
 	        // Subscribe to the stream
-	        session.subscribe(streams[i], 'coolio');
+	        session.subscribe(streams[i], 'coolio',subscriberProps);
 	      }
 	    }
 	}
@@ -238,7 +245,7 @@
 		background-color:white;
 	}
       body {
-        padding-top: 40px; /* 40px to make the container go all the way to the bottom of the topbar */
+        padding-top: 20px; /* 40px to make the container go all the way to the bottom of the topbar */
       }
       .container > footer p {
         text-align: center; /* center align it with the container */
@@ -327,11 +334,12 @@
     <div class="container" style="padding-top:30px"> 
 	<div id="endcall"></div>
 	<div class="row" style="">
-		<div class="span4">
+		
+		<div class="span6">
 				<div id="coolio"></div>
 		</div>
 		<div class="span4">
-			<div id="publio"></div>
+			<div style="" id="publio"></div>
 		</div>
 	</div>
 	<div id="chatarea">
@@ -370,7 +378,7 @@
 		              
 		            </div>
 		          </div>
-        <div id="mainpanel">
+        <div id="mainpanel" style="padding-top:20px">
         <div class="row" style="">
           <div class="span7">
 	<div style=" background-color:#fff;border-radius:8px;-moz-border-radius:8px;-webkit-border-radius:8px">
